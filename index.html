@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Digital Kessy — Quote Generator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #050008;
+      color: #fff;
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 1.5rem;
+      color: #C084FC;
+      text-align: center;
+      margin-bottom: 0.25rem;
+    }
+
+    .sub {
+      text-align: center;
+      font-size: 0.75rem;
+      color: #6B7280;
+      letter-spacing: 0.1em;
+      margin-bottom: 2rem;
+    }
+
+    /* CONTROLS */
+    .controls {
+      max-width: 500px;
+      margin: 0 auto 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    textarea {
+      background: #0D000F;
+      border: 1px solid #2D1B45;
+      color: #fff;
+      padding: 1rem;
+      border-radius: 4px;
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem;
+      font-style: italic;
+      resize: none;
+      height: 120px;
+      outline: none;
+      transition: border-color 0.2s;
+      width: 100%;
+    }
+    textarea:focus { border-color: #7C3AED; }
+    textarea::placeholder { color: #4B5563; font-style: italic; }
+
+    .style-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    select {
+      background: #0D000F;
+      border: 1px solid #2D1B45;
+      color: #fff;
+      padding: 0.75rem 1rem;
+      border-radius: 4px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      outline: none;
+      cursor: pointer;
+      width: 100%;
+    }
+    select:focus { border-color: #7C3AED; }
+
+    .btn-generate {
+      background: linear-gradient(135deg, #7C3AED, #A855F7);
+      color: #fff;
+      border: none;
+      padding: 1rem;
+      border-radius: 4px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      transition: all 0.2s;
+      width: 100%;
+    }
+    .btn-generate:hover { opacity: 0.85; transform: translateY(-1px); }
+
+    .btn-tip {
+      text-align: center;
+      font-size: 0.72rem;
+      color: #6B7280;
+      letter-spacing: 0.05em;
+    }
+
+    /* QUOTE CARD DISPLAY */
+    #card-wrap {
+      max-width: 500px;
+      margin: 0 auto;
+      display: none;
+    }
+
+    #card-wrap.visible { display: block; }
+
+    /* THE ACTUAL CARD */
+    #quote-card {
+      width: 100%;
+      aspect-ratio: 1;
+      position: relative;
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 2.5rem;
+    }
+
+    /* STYLE 1 — Dark Purple */
+    #quote-card.style-1 {
+      background: linear-gradient(135deg, #0D000F 0%, #1A0030 50%, #0D000F 100%);
+      border: 1px solid #3D1B6B;
+    }
+
+    /* STYLE 2 — Deep Black */
+    #quote-card.style-2 {
+      background: linear-gradient(135deg, #000000 0%, #0A000A 50%, #050005 100%);
+      border: 1px solid #2D1B45;
+    }
+
+    /* STYLE 3 — Purple Glow */
+    #quote-card.style-3 {
+      background: linear-gradient(135deg, #1A0040 0%, #2D006B 50%, #1A0040 100%);
+      border: 1px solid #6D28D9;
+    }
+
+    /* STYLE 4 — Midnight Rose */
+    #quote-card.style-4 {
+      background: linear-gradient(135deg, #0A0010 0%, #1A000A 50%, #0A0010 100%);
+      border: 1px solid #4C1D95;
+    }
+
+    .card-accent {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: linear-gradient(180deg, #7C3AED, #C084FC, #7C3AED);
+    }
+
+    .card-glow {
+      position: absolute;
+      top: -50px;
+      right: -50px;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(124, 58, 237, 0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .card-glow-2 {
+      position: absolute;
+      bottom: -50px;
+      left: -50px;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(192, 132, 252, 0.1) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .card-top {
+      font-size: 0.6rem;
+      letter-spacing: 0.3em;
+      color: #C084FC;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+      font-family: 'DM Sans', sans-serif;
+      position: relative;
+      z-index: 1;
+    }
+
+    .card-quote {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: clamp(1rem, 3.5vw, 1.4rem);
+      line-height: 1.7;
+      color: #F3E8FF;
+      position: relative;
+      z-index: 1;
+      margin-bottom: 1.5rem;
+    }
+
+    .card-quote::before {
+      content: '\201C';
+      font-size: 3rem;
+      color: #7C3AED;
+      line-height: 0;
+      vertical-align: -0.4em;
+      margin-right: 0.1em;
+      opacity: 0.6;
+    }
+
+    .card-divider {
+      width: 40px;
+      height: 1px;
+      background: linear-gradient(90deg, #7C3AED, #C084FC);
+      margin-bottom: 1rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .card-author {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      color: #C084FC;
+      text-transform: uppercase;
+      position: relative;
+      z-index: 1;
+    }
+
+    .card-logo {
+      position: absolute;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 0.75rem;
+      color: rgba(192, 132, 252, 0.4);
+      letter-spacing: 0.05em;
+      z-index: 1;
+    }
+
+    /* ACTIONS */
+    .card-actions {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1.25rem;
+    }
+
+    .btn-action {
+      flex: 1;
+      padding: 0.75rem;
+      border-radius: 4px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+      border: none;
+    }
+
+    .btn-screenshot {
+      background: #7C3AED;
+      color: #fff;
+    }
+    .btn-screenshot:hover { background: #6D28D9; }
+
+    .btn-new {
+      background: transparent;
+      color: #C084FC;
+      border: 1px solid #3D1B6B !important;
+      border: none;
+    }
+    .btn-new:hover { background: rgba(124, 58, 237, 0.1); }
+
+    .screenshot-tip {
+      text-align: center;
+      font-size: 0.7rem;
+      color: #4B5563;
+      margin-top: 0.75rem;
+      letter-spacing: 0.05em;
+    }
+
+    /* PRESET QUOTES */
+    .presets {
+      max-width: 500px;
+      margin: 2rem auto 0;
+    }
+    .presets-title {
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      color: #6B7280;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+      text-align: center;
+    }
+    .preset-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+    .preset-chip {
+      background: #0D000F;
+      border: 1px solid #2D1B45;
+      color: #9CA3AF;
+      padding: 0.4rem 0.8rem;
+      border-radius: 100px;
+      font-size: 0.72rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .preset-chip:hover { border-color: #7C3AED; color: #C084FC; }
+  </style>
+</head>
+<body>
+
+<h1>Digital Kessy</h1>
+<p class="sub">✦ QUOTE CARD GENERATOR ✦</p>
+
+<!-- CONTROLS -->
+<div class="controls">
+  <textarea id="quote-input" placeholder="Type your quote here... e.g. You don't have to accept reality when you can sharpen it with your imagination"></textarea>
+
+  <div class="style-row">
+    <select id="style-select">
+      <option value="style-1">Dark Purple</option>
+      <option value="style-2">Deep Black</option>
+      <option value="style-3">Purple Glow</option>
+      <option value="style-4">Midnight Rose</option>
+    </select>
+    <select id="size-select">
+      <option value="normal">Normal Text</option>
+      <option value="large">Large Text</option>
+      <option value="small">Small Text</option>
+    </select>
+  </div>
+
+  <button class="btn-generate" onclick="generateCard()">✦ Generate Quote Card</button>
+  <p class="btn-tip">Screenshot the card to save & post on TikTok or WhatsApp</p>
+</div>
+
+<!-- CARD OUTPUT -->
+<div id="card-wrap">
+  <div id="quote-card" class="style-1">
+    <div class="card-accent"></div>
+    <div class="card-glow"></div>
+    <div class="card-glow-2"></div>
+    <div class="card-top">✦ Digital Kessy ✦</div>
+    <div class="card-quote" id="card-quote-text"></div>
+    <div class="card-divider"></div>
+    <div class="card-author">— Digital Kessy</div>
+    <div class="card-logo">digitalkessy</div>
+  </div>
+
+  <div class="card-actions">
+    <button class="btn-action btn-screenshot" onclick="takeScreenshot()">📸 Screenshot Instructions</button>
+    <button class="btn-action btn-new" onclick="resetCard()">← New Quote</button>
+  </div>
+  <p class="screenshot-tip" id="screenshot-msg"></p>
+</div>
+
+<!-- PRESET QUOTES -->
+<div class="presets">
+  <p class="presets-title">Tap a quote to use it</p>
+  <div class="preset-chips">
+    <div class="preset-chip" onclick="usePreset(this)">You don't have to accept reality when you can sharpen it with your imagination</div>
+    <div class="preset-chip" onclick="usePreset(this)">Dark romance isn't just a genre — it's an emotion. If you can make someone feel something with your words, that skill is worth real money.</div>
+    <div class="preset-chip" onclick="usePreset(this)">You don't need to be perfect. You need to be passionate, consistent, and willing to learn. The rest, we handle together.</div>
+    <div class="preset-chip" onclick="usePreset(this)">I started with nothing but stories in my head. Now I earn in USD from readers who stay up at 3am reading what I wrote. That can be you too.</div>
+    <div class="preset-chip" onclick="usePreset(this)">The quietest girls have the loudest imaginations. Monetize that.</div>
+    <div class="preset-chip" onclick="usePreset(this)">Broke is temporary. A finished book is forever.</div>
+    <div class="preset-chip" onclick="usePreset(this)">Write the story you wish existed. Then get paid for it.</div>
+    <div class="preset-chip" onclick="usePreset(this)">Your story doesn't have to be perfect. It just has to be honest.</div>
+    <div class="preset-chip" onclick="usePreset(this)">Imagination is not a hobby. In the right hands it's a business.</div>
+    <div class="preset-chip" onclick="usePreset(this)">Nobody believed writing dark romance could pay bills. My bank account disagreed.</div>
+    <div class="preset-chip" onclick="usePreset(this)">Pen down your imagination before someone else pens down theirs first.</div>
+    <div class="preset-chip" onclick="usePreset(this)">The girl who reads dark romance at 3am? She's also the girl who can write it and get paid.</div>
+  </div>
+</div>
+
+<script>
+  function generateCard() {
+    const quote = document.getElementById('quote-input').value.trim();
+    if (!quote) { alert('Please type a quote first!'); return; }
+
+    const style = document.getElementById('style-select').value;
+    const size = document.getElementById('size-select').value;
+
+    const card = document.getElementById('quote-card');
+    const quoteText = document.getElementById('card-quote-text');
+    const wrap = document.getElementById('card-wrap');
+
+    // Set style
+    card.className = style;
+
+    // Set text size
+    const sizes = { normal: 'clamp(1rem, 3.5vw, 1.4rem)', large: 'clamp(1.2rem, 4vw, 1.7rem)', small: 'clamp(0.85rem, 2.5vw, 1.1rem)' };
+    quoteText.style.fontSize = sizes[size];
+
+    quoteText.textContent = quote;
+    wrap.classList.add('visible');
+    wrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function usePreset(el) {
+    document.getElementById('quote-input').value = el.textContent;
+    document.getElementById('quote-input').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function resetCard() {
+    document.getElementById('card-wrap').classList.remove('visible');
+    document.getElementById('quote-input').value = '';
+    document.getElementById('quote-input').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function takeScreenshot() {
+    const msg = document.getElementById('screenshot-msg');
+    const isAndroid = /android/i.test(navigator.userAgent);
+    const isIOS = /iphone|ipad/i.test(navigator.userAgent);
+
+    if (isAndroid) {
+      msg.textContent = '📱 Android: Press Power + Volume Down at the same time to screenshot!';
+    } else if (isIOS) {
+      msg.textContent = '📱 iPhone: Press Side Button + Volume Up at the same time to screenshot!';
+    } else {
+      msg.textContent = '💻 Press PrtScn or use Snipping Tool to screenshot!';
+    }
+    msg.style.color = '#C084FC';
+  }
+</script>
+
+</body>
+</html>
