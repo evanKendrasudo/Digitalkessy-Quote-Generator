@@ -1,438 +1,539 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Digital Kessy — Quote Generator</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      background: #050008;
-      color: #fff;
-      font-family: 'DM Sans', sans-serif;
-      min-height: 100vh;
-      padding: 2rem 1rem;
-    }
-
-    h1 {
-      font-family: 'Playfair Display', serif;
-      font-style: italic;
-      font-size: 1.5rem;
-      color: #C084FC;
-      text-align: center;
-      margin-bottom: 0.25rem;
-    }
-
-    .sub {
-      text-align: center;
-      font-size: 0.75rem;
-      color: #6B7280;
-      letter-spacing: 0.1em;
-      margin-bottom: 2rem;
-    }
-
-    /* CONTROLS */
-    .controls {
-      max-width: 500px;
-      margin: 0 auto 2rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-
-    textarea {
-      background: #0D000F;
-      border: 1px solid #2D1B45;
-      color: #fff;
-      padding: 1rem;
-      border-radius: 4px;
-      font-family: 'Playfair Display', serif;
-      font-size: 1rem;
-      font-style: italic;
-      resize: none;
-      height: 120px;
-      outline: none;
-      transition: border-color 0.2s;
-      width: 100%;
-    }
-    textarea:focus { border-color: #7C3AED; }
-    textarea::placeholder { color: #4B5563; font-style: italic; }
-
-    .style-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.75rem;
-    }
-
-    select {
-      background: #0D000F;
-      border: 1px solid #2D1B45;
-      color: #fff;
-      padding: 0.75rem 1rem;
-      border-radius: 4px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.85rem;
-      outline: none;
-      cursor: pointer;
-      width: 100%;
-    }
-    select:focus { border-color: #7C3AED; }
-
-    .btn-generate {
-      background: linear-gradient(135deg, #7C3AED, #A855F7);
-      color: #fff;
-      border: none;
-      padding: 1rem;
-      border-radius: 4px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.9rem;
-      font-weight: 500;
-      letter-spacing: 0.1em;
-      cursor: pointer;
-      transition: all 0.2s;
-      width: 100%;
-    }
-    .btn-generate:hover { opacity: 0.85; transform: translateY(-1px); }
-
-    .btn-tip {
-      text-align: center;
-      font-size: 0.72rem;
-      color: #6B7280;
-      letter-spacing: 0.05em;
-    }
-
-    /* QUOTE CARD DISPLAY */
-    #card-wrap {
-      max-width: 500px;
-      margin: 0 auto;
-      display: none;
-    }
-
-    #card-wrap.visible { display: block; }
-
-    /* THE ACTUAL CARD */
-    #quote-card {
-      width: 100%;
-      aspect-ratio: 1;
-      position: relative;
-      border-radius: 8px;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      justify-content: center;
-      padding: 2.5rem;
-    }
-
-    /* STYLE 1 — Dark Purple */
-    #quote-card.style-1 {
-      background: linear-gradient(135deg, #0D000F 0%, #1A0030 50%, #0D000F 100%);
-      border: 1px solid #3D1B6B;
-    }
-
-    /* STYLE 2 — Deep Black */
-    #quote-card.style-2 {
-      background: linear-gradient(135deg, #000000 0%, #0A000A 50%, #050005 100%);
-      border: 1px solid #2D1B45;
-    }
-
-    /* STYLE 3 — Purple Glow */
-    #quote-card.style-3 {
-      background: linear-gradient(135deg, #1A0040 0%, #2D006B 50%, #1A0040 100%);
-      border: 1px solid #6D28D9;
-    }
-
-    /* STYLE 4 — Midnight Rose */
-    #quote-card.style-4 {
-      background: linear-gradient(135deg, #0A0010 0%, #1A000A 50%, #0A0010 100%);
-      border: 1px solid #4C1D95;
-    }
-
-    .card-accent {
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 3px;
-      background: linear-gradient(180deg, #7C3AED, #C084FC, #7C3AED);
-    }
-
-    .card-glow {
-      position: absolute;
-      top: -50px;
-      right: -50px;
-      width: 200px;
-      height: 200px;
-      background: radial-gradient(circle, rgba(124, 58, 237, 0.15) 0%, transparent 70%);
-      pointer-events: none;
-    }
-
-    .card-glow-2 {
-      position: absolute;
-      bottom: -50px;
-      left: -50px;
-      width: 200px;
-      height: 200px;
-      background: radial-gradient(circle, rgba(192, 132, 252, 0.1) 0%, transparent 70%);
-      pointer-events: none;
-    }
-
-    .card-top {
-      font-size: 0.6rem;
-      letter-spacing: 0.3em;
-      color: #C084FC;
-      text-transform: uppercase;
-      margin-bottom: 1.5rem;
-      font-family: 'DM Sans', sans-serif;
-      position: relative;
-      z-index: 1;
-    }
-
-    .card-quote {
-      font-family: 'Playfair Display', serif;
-      font-style: italic;
-      font-size: clamp(1rem, 3.5vw, 1.4rem);
-      line-height: 1.7;
-      color: #F3E8FF;
-      position: relative;
-      z-index: 1;
-      margin-bottom: 1.5rem;
-    }
-
-    .card-quote::before {
-      content: '\201C';
-      font-size: 3rem;
-      color: #7C3AED;
-      line-height: 0;
-      vertical-align: -0.4em;
-      margin-right: 0.1em;
-      opacity: 0.6;
-    }
-
-    .card-divider {
-      width: 40px;
-      height: 1px;
-      background: linear-gradient(90deg, #7C3AED, #C084FC);
-      margin-bottom: 1rem;
-      position: relative;
-      z-index: 1;
-    }
-
-    .card-author {
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.75rem;
-      letter-spacing: 0.2em;
-      color: #C084FC;
-      text-transform: uppercase;
-      position: relative;
-      z-index: 1;
-    }
-
-    .card-logo {
-      position: absolute;
-      bottom: 1.5rem;
-      right: 1.5rem;
-      font-family: 'Playfair Display', serif;
-      font-style: italic;
-      font-size: 0.75rem;
-      color: rgba(192, 132, 252, 0.4);
-      letter-spacing: 0.05em;
-      z-index: 1;
-    }
-
-    /* ACTIONS */
-    .card-actions {
-      display: flex;
-      gap: 0.75rem;
-      margin-top: 1.25rem;
-    }
-
-    .btn-action {
-      flex: 1;
-      padding: 0.75rem;
-      border-radius: 4px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.8rem;
-      font-weight: 500;
-      letter-spacing: 0.1em;
-      cursor: pointer;
-      transition: all 0.2s;
-      text-align: center;
-      border: none;
-    }
-
-    .btn-screenshot {
-      background: #7C3AED;
-      color: #fff;
-    }
-    .btn-screenshot:hover { background: #6D28D9; }
-
-    .btn-new {
-      background: transparent;
-      color: #C084FC;
-      border: 1px solid #3D1B6B !important;
-      border: none;
-    }
-    .btn-new:hover { background: rgba(124, 58, 237, 0.1); }
-
-    .screenshot-tip {
-      text-align: center;
-      font-size: 0.7rem;
-      color: #4B5563;
-      margin-top: 0.75rem;
-      letter-spacing: 0.05em;
-    }
-
-    /* PRESET QUOTES */
-    .presets {
-      max-width: 500px;
-      margin: 2rem auto 0;
-    }
-    .presets-title {
-      font-size: 0.7rem;
-      letter-spacing: 0.2em;
-      color: #6B7280;
-      text-transform: uppercase;
-      margin-bottom: 0.75rem;
-      text-align: center;
-    }
-    .preset-chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      justify-content: center;
-    }
-    .preset-chip {
-      background: #0D000F;
-      border: 1px solid #2D1B45;
-      color: #9CA3AF;
-      padding: 0.4rem 0.8rem;
-      border-radius: 100px;
-      font-size: 0.72rem;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-family: 'DM Sans', sans-serif;
-    }
-    .preset-chip:hover { border-color: #7C3AED; color: #C084FC; }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Digital Kessy — Quote Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300&family=DM+Serif+Display:ital@0;1&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,600;1,400&family=Cinzel:wght@400;600&family=Raleway:wght@300;400;600&family=Josefin+Sans:wght@300;400;600&family=Montserrat:wght@300;400;600&family=Dancing+Script:wght@400;700&family=Great+Vibes&family=Sacramento&family=Quicksand:wght@400;600&family=Nunito:wght@300;400;600&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+ 
+  :root {
+    --bg: #0d0010;
+    --card-bg: #12001a;
+    --accent: #7b2d8b;
+    --accent2: #c084fc;
+    --gold: #e2c97e;
+    --text: #f0e6ff;
+    --muted: #9b7db5;
+    --border: rgba(192, 132, 252, 0.2);
+  }
+ 
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Raleway', sans-serif;
+    min-height: 100vh;
+    padding: 20px 16px 60px;
+    overflow-x: hidden;
+  }
+ 
+  /* noise overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+ 
+  .container { position: relative; z-index: 1; max-width: 480px; margin: 0 auto; }
+ 
+  /* HEADER */
+  .header { text-align: center; padding: 24px 0 20px; }
+  .header-brand {
+    font-family: 'Cinzel', serif;
+    font-size: 22px;
+    letter-spacing: 4px;
+    color: var(--accent2);
+    text-shadow: 0 0 20px rgba(192,132,252,0.4);
+  }
+  .header-sub {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    margin-top: 4px;
+    text-transform: uppercase;
+  }
+  .divider {
+    display: flex; align-items: center; gap: 10px;
+    margin: 16px 0;
+  }
+  .divider::before, .divider::after {
+    content: ''; flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+  }
+  .divider-icon { color: var(--gold); font-size: 12px; }
+ 
+  /* CONTROLS */
+  .controls-section { margin-bottom: 14px; }
+  .controls-label {
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    text-align: center;
+  }
+ 
+  /* Theme buttons */
+  .btn-group {
+    display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
+  }
+  .btn {
+    padding: 7px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: rgba(123,45,139,0.15);
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.25s;
+    font-family: 'Raleway', sans-serif;
+  }
+  .btn:hover { border-color: var(--accent2); color: var(--accent2); }
+  .btn.active {
+    background: var(--accent);
+    border-color: var(--accent2);
+    color: #fff;
+    box-shadow: 0 0 12px rgba(123,45,139,0.5);
+  }
+ 
+  /* Size buttons */
+  .size-btn { min-width: 70px; }
+ 
+  /* Font style scroll */
+  .font-scroll {
+    display: flex; gap: 8px;
+    overflow-x: auto;
+    padding: 4px 2px 8px;
+    scrollbar-width: none;
+  }
+  .font-scroll::-webkit-scrollbar { display: none; }
+  .font-btn {
+    flex-shrink: 0;
+    padding: 7px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: rgba(123,45,139,0.1);
+    color: var(--muted);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.25s;
+    white-space: nowrap;
+  }
+  .font-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+  .font-btn.active {
+    background: rgba(123,45,139,0.4);
+    border-color: var(--accent2);
+    color: var(--accent2);
+    box-shadow: 0 0 10px rgba(123,45,139,0.4);
+  }
+ 
+  /* CARD */
+  .card-wrapper {
+    position: relative;
+    margin: 18px 0;
+  }
+  .quote-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 36px 28px 28px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s ease;
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .quote-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    background: radial-gradient(ellipse at 30% 20%, rgba(123,45,139,0.18) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 80%, rgba(192,132,252,0.08) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  .quote-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent2), transparent);
+    opacity: 0.5;
+  }
+ 
+  /* corner ornament */
+  .ornament {
+    position: absolute;
+    font-size: 60px;
+    color: var(--accent2);
+    opacity: 0.06;
+    line-height: 1;
+    font-family: 'Playfair Display', serif;
+  }
+  .ornament-tl { top: 6px; left: 14px; }
+  .ornament-br { bottom: -10px; right: 14px; transform: rotate(180deg); }
+ 
+  .quote-text {
+    position: relative;
+    z-index: 1;
+    transition: font-family 0.3s, font-size 0.3s;
+    line-height: 1.7;
+    color: var(--text);
+  }
+  .quote-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 22px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+    position: relative; z-index: 1;
+  }
+  .quote-author {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--gold);
+    text-transform: uppercase;
+    font-family: 'Cinzel', serif;
+  }
+  .quote-brand {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-family: 'Cinzel', serif;
+  }
+ 
+  /* THEME VARIANTS */
+  .theme-purple {
+    --card-bg: #12001a;
+    --border: rgba(192, 132, 252, 0.2);
+  }
+  .theme-black {
+    --card-bg: #050505;
+    --border: rgba(255,255,255,0.1);
+    --accent2: #d4d4d4;
+    --gold: #c9a84c;
+  }
+  .theme-glow {
+    --card-bg: #0e0022;
+    --border: rgba(192,132,252,0.35);
+    box-shadow: 0 0 30px rgba(123,45,139,0.4), inset 0 0 30px rgba(123,45,139,0.05);
+  }
+  .theme-rose {
+    --card-bg: #180010;
+    --border: rgba(244,114,182,0.25);
+    --accent2: #f472b6;
+    --gold: #fbbf24;
+  }
+ 
+  /* SIZE */
+  .size-small .quote-text  { font-size: 13px; }
+  .size-normal .quote-text { font-size: 16px; }
+  .size-large .quote-text  { font-size: 20px; }
+ 
+  /* FONT FAMILIES */
+  .font-playfair .quote-text    { font-family: 'Playfair Display', serif; }
+  .font-garamond .quote-text    { font-family: 'EB Garamond', serif; }
+  .font-cormorant .quote-text   { font-family: 'Cormorant Garamond', serif; font-weight: 300; }
+  .font-dm-serif .quote-text    { font-family: 'DM Serif Display', serif; }
+  .font-baskerville .quote-text { font-family: 'Libre Baskerville', serif; }
+  .font-lora .quote-text        { font-family: 'Lora', serif; }
+  .font-cinzel .quote-text      { font-family: 'Cinzel', serif; letter-spacing: 1px; }
+  .font-raleway .quote-text     { font-family: 'Raleway', sans-serif; font-weight: 300; }
+  .font-josefin .quote-text     { font-family: 'Josefin Sans', sans-serif; font-weight: 300; letter-spacing: 1px; }
+  .font-montserrat .quote-text  { font-family: 'Montserrat', sans-serif; font-weight: 300; }
+  .font-dancing .quote-text     { font-family: 'Dancing Script', cursive; }
+  .font-great-vibes .quote-text { font-family: 'Great Vibes', cursive; }
+  .font-sacramento .quote-text  { font-family: 'Sacramento', cursive; font-size: 1.2em; }
+  .font-quicksand .quote-text   { font-family: 'Quicksand', sans-serif; }
+  .font-nunito .quote-text      { font-family: 'Nunito', sans-serif; font-weight: 300; }
+ 
+  /* GENERATE BUTTON */
+  .generate-btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--accent), #4a0060);
+    border: 1px solid var(--accent2);
+    border-radius: 12px;
+    color: #fff;
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    letter-spacing: 3px;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+  .generate-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent, rgba(255,255,255,0.05));
+  }
+  .generate-btn:hover {
+    box-shadow: 0 0 24px rgba(123,45,139,0.6);
+    transform: translateY(-1px);
+  }
+  .generate-btn:active { transform: translateY(0); }
+ 
+  /* QUOTE LIST */
+  .quote-list-label {
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    text-transform: uppercase;
+    text-align: center;
+    margin: 20px 0 10px;
+  }
+  .quote-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 300px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent) transparent;
+    padding-right: 4px;
+  }
+  .quote-item {
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 12px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    background: rgba(123,45,139,0.05);
+    line-height: 1.5;
+  }
+  .quote-item:hover {
+    border-color: var(--accent2);
+    color: var(--text);
+    background: rgba(123,45,139,0.15);
+  }
+  .quote-item.selected {
+    border-color: var(--accent2);
+    color: var(--text);
+    background: rgba(123,45,139,0.2);
+  }
+ 
+  /* HINT */
+  .hint {
+    text-align: center;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    margin: 16px 0 8px;
+  }
+ 
+  /* FOOTER */
+  .footer {
+    text-align: center;
+    padding: 20px 0 0;
+  }
+  .footer-brand {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--muted);
+  }
+  .footer-brand span { color: var(--accent2); }
+ 
+  /* fade animation */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .fade-in { animation: fadeIn 0.4s ease forwards; }
+</style>
 </head>
 <body>
-
-<h1>Digital Kessy</h1>
-<p class="sub">✦ QUOTE CARD GENERATOR ✦</p>
-
-<!-- CONTROLS -->
-<div class="controls">
-  <textarea id="quote-input" placeholder="Type your quote here... e.g. You don't have to accept reality when you can sharpen it with your imagination"></textarea>
-
-  <div class="style-row">
-    <select id="style-select">
-      <option value="style-1">Dark Purple</option>
-      <option value="style-2">Deep Black</option>
-      <option value="style-3">Purple Glow</option>
-      <option value="style-4">Midnight Rose</option>
-    </select>
-    <select id="size-select">
-      <option value="normal">Normal Text</option>
-      <option value="large">Large Text</option>
-      <option value="small">Small Text</option>
-    </select>
+ 
+<div class="container">
+ 
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-brand">Digital Kessy</div>
+    <div class="header-sub">✦ Quote Card Generator ✦</div>
   </div>
-
-  <button class="btn-generate" onclick="generateCard()">✦ Generate Quote Card</button>
-  <p class="btn-tip">Screenshot the card to save & post on TikTok or WhatsApp</p>
+ 
+  <div class="divider"><span class="divider-icon">✦</span></div>
+ 
+  <!-- THEME -->
+  <div class="controls-section">
+    <div class="controls-label">Theme</div>
+    <div class="btn-group" id="themeGroup">
+      <button class="btn active" data-theme="purple">Dark Purple</button>
+      <button class="btn" data-theme="black">Deep Black</button>
+      <button class="btn" data-theme="glow">Purple Glow</button>
+      <button class="btn" data-theme="rose">Midnight Rose</button>
+    </div>
+  </div>
+ 
+  <!-- SIZE -->
+  <div class="controls-section">
+    <div class="controls-label">Text Size</div>
+    <div class="btn-group" id="sizeGroup">
+      <button class="btn size-btn active" data-size="normal">Normal</button>
+      <button class="btn size-btn" data-size="large">Large</button>
+      <button class="btn size-btn" data-size="small">Small</button>
+    </div>
+  </div>
+ 
+  <!-- FONT STYLE -->
+  <div class="controls-section">
+    <div class="controls-label">Font Style — scroll for more →</div>
+    <div class="font-scroll" id="fontGroup">
+      <button class="font-btn active" data-font="playfair" style="font-family:'Playfair Display',serif">Playfair</button>
+      <button class="font-btn" data-font="garamond" style="font-family:'EB Garamond',serif">EB Garamond</button>
+      <button class="font-btn" data-font="cormorant" style="font-family:'Cormorant Garamond',serif">Cormorant</button>
+      <button class="font-btn" data-font="dm-serif" style="font-family:'DM Serif Display',serif">DM Serif</button>
+      <button class="font-btn" data-font="baskerville" style="font-family:'Libre Baskerville',serif">Baskerville</button>
+      <button class="font-btn" data-font="lora" style="font-family:'Lora',serif">Lora</button>
+      <button class="font-btn" data-font="cinzel" style="font-family:'Cinzel',serif">Cinzel</button>
+      <button class="font-btn" data-font="raleway" style="font-family:'Raleway',sans-serif">Raleway</button>
+      <button class="font-btn" data-font="josefin" style="font-family:'Josefin Sans',sans-serif">Josefin</button>
+      <button class="font-btn" data-font="montserrat" style="font-family:'Montserrat',sans-serif">Montserrat</button>
+      <button class="font-btn" data-font="dancing" style="font-family:'Dancing Script',cursive">Dancing Script</button>
+      <button class="font-btn" data-font="great-vibes" style="font-family:'Great Vibes',cursive">Great Vibes</button>
+      <button class="font-btn" data-font="sacramento" style="font-family:'Sacramento',cursive">Sacramento</button>
+      <button class="font-btn" data-font="quicksand" style="font-family:'Quicksand',sans-serif">Quicksand</button>
+      <button class="font-btn" data-font="nunito" style="font-family:'Nunito',sans-serif">Nunito</button>
+    </div>
+  </div>
+ 
+  <div class="divider"><span class="divider-icon">✦</span></div>
+ 
+  <!-- QUOTE CARD -->
+  <div class="card-wrapper">
+    <div class="quote-card theme-purple size-normal font-playfair" id="quoteCard">
+      <div class="ornament ornament-tl">"</div>
+      <div class="ornament ornament-br">"</div>
+      <p class="quote-text fade-in" id="quoteText">
+        You don't have to accept reality when you can sharpen it with your imagination.
+      </p>
+      <div class="quote-footer">
+        <span class="quote-author" id="quoteAuthor">— Digital Kessy</span>
+        <span class="quote-brand">digitalkessy</span>
+      </div>
+    </div>
+  </div>
+ 
+  <button class="generate-btn" id="generateBtn">✦ Generate Quote Card</button>
+ 
+  <p class="hint">Screenshot the card to save &amp; post on TikTok or WhatsApp</p>
+ 
+  <!-- QUOTE LIST -->
+  <div class="quote-list-label">✦ Tap a quote to use it</div>
+  <div class="quote-list" id="quoteList"></div>
+ 
+  <div class="divider" style="margin-top:24px"><span class="divider-icon">✦</span></div>
+  <div class="footer">
+    <div class="footer-brand">✦ <span>Digital Kessy</span> ✦</div>
+  </div>
+ 
 </div>
-
-<!-- CARD OUTPUT -->
-<div id="card-wrap">
-  <div id="quote-card" class="style-1">
-    <div class="card-accent"></div>
-    <div class="card-glow"></div>
-    <div class="card-glow-2"></div>
-    <div class="card-top">✦ Digital Kessy ✦</div>
-    <div class="card-quote" id="card-quote-text"></div>
-    <div class="card-divider"></div>
-    <div class="card-author">— Digital Kessy</div>
-    <div class="card-logo">digitalkessy</div>
-  </div>
-
-  <div class="card-actions">
-    <button class="btn-action btn-screenshot" onclick="takeScreenshot()">📸 Screenshot Instructions</button>
-    <button class="btn-action btn-new" onclick="resetCard()">← New Quote</button>
-  </div>
-  <p class="screenshot-tip" id="screenshot-msg"></p>
-</div>
-
-<!-- PRESET QUOTES -->
-<div class="presets">
-  <p class="presets-title">Tap a quote to use it</p>
-  <div class="preset-chips">
-    <div class="preset-chip" onclick="usePreset(this)">You don't have to accept reality when you can sharpen it with your imagination</div>
-    <div class="preset-chip" onclick="usePreset(this)">Dark romance isn't just a genre — it's an emotion. If you can make someone feel something with your words, that skill is worth real money.</div>
-    <div class="preset-chip" onclick="usePreset(this)">You don't need to be perfect. You need to be passionate, consistent, and willing to learn. The rest, we handle together.</div>
-    <div class="preset-chip" onclick="usePreset(this)">I started with nothing but stories in my head. Now I earn in USD from readers who stay up at 3am reading what I wrote. That can be you too.</div>
-    <div class="preset-chip" onclick="usePreset(this)">The quietest girls have the loudest imaginations. Monetize that.</div>
-    <div class="preset-chip" onclick="usePreset(this)">Broke is temporary. A finished book is forever.</div>
-    <div class="preset-chip" onclick="usePreset(this)">Write the story you wish existed. Then get paid for it.</div>
-    <div class="preset-chip" onclick="usePreset(this)">Your story doesn't have to be perfect. It just has to be honest.</div>
-    <div class="preset-chip" onclick="usePreset(this)">Imagination is not a hobby. In the right hands it's a business.</div>
-    <div class="preset-chip" onclick="usePreset(this)">Nobody believed writing dark romance could pay bills. My bank account disagreed.</div>
-    <div class="preset-chip" onclick="usePreset(this)">Pen down your imagination before someone else pens down theirs first.</div>
-    <div class="preset-chip" onclick="usePreset(this)">The girl who reads dark romance at 2am? She's also the girl who can write it and get paid.</div>
-  </div>
-</div>
-
+ 
 <script>
-  function generateCard() {
-    const quote = document.getElementById('quote-input').value.trim();
-    if (!quote) { alert('Please type a quote first!'); return; }
-
-    const style = document.getElementById('style-select').value;
-    const size = document.getElementById('size-select').value;
-
-    const card = document.getElementById('quote-card');
-    const quoteText = document.getElementById('card-quote-text');
-    const wrap = document.getElementById('card-wrap');
-
-    // Set style
-    card.className = style;
-
-    // Set text size
-    const sizes = { normal: 'clamp(1rem, 3.5vw, 1.4rem)', large: 'clamp(1.2rem, 4vw, 1.7rem)', small: 'clamp(0.85rem, 2.5vw, 1.1rem)' };
-    quoteText.style.fontSize = sizes[size];
-
-    quoteText.textContent = quote;
-    wrap.classList.add('visible');
-    wrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }
-
-  function usePreset(el) {
-    document.getElementById('quote-input').value = el.textContent;
-    document.getElementById('quote-input').scrollIntoView({ behavior: 'smooth' });
-  }
-
-  function resetCard() {
-    document.getElementById('card-wrap').classList.remove('visible');
-    document.getElementById('quote-input').value = '';
-    document.getElementById('quote-input').scrollIntoView({ behavior: 'smooth' });
-  }
-
-  function takeScreenshot() {
-    const msg = document.getElementById('screenshot-msg');
-    const isAndroid = /android/i.test(navigator.userAgent);
-    const isIOS = /iphone|ipad/i.test(navigator.userAgent);
-
-    if (isAndroid) {
-      msg.textContent = '📱 Android: Press Power + Volume Down at the same time to screenshot!';
-    } else if (isIOS) {
-      msg.textContent = '📱 iPhone: Press Side Button + Volume Up at the same time to screenshot!';
-    } else {
-      msg.textContent = '💻 Press PrtScn or use Snipping Tool to screenshot!';
-    }
-    msg.style.color = '#C084FC';
-  }
+const quotes = [
+  "You don't have to accept reality when you can sharpen it with your imagination.",
+  "Dark romance isn't just a genre — it's an emotion. If you can make someone feel something with your words, that skill is worth real money.",
+  "You don't need to be perfect. You need to be passionate, consistent, and willing to learn. The rest, we handle together.",
+  "I started with nothing but stories in my head. Now I earn in USD from readers who stay up at 3am reading what I wrote. That can be you too.",
+  "The quietest girls have the loudest imaginations. Monetize that.",
+  "Broke is temporary. A finished book is forever.",
+  "Write the story you wish existed. Then get paid for it.",
+  "Your story doesn't have to be perfect. It just has to be honest.",
+  "Imagination is not a hobby. In the right hands it's a business.",
+  "Nobody believed writing dark romance could pay bills. My bank account disagreed.",
+  "Pen down your imagination before someone else pens down theirs first.",
+  "The girl who reads dark romance at 2am? She's also the girl who can write it and get paid."
+];
+ 
+const card   = document.getElementById('quoteCard');
+const qText  = document.getElementById('quoteText');
+let currentTheme = 'purple';
+let currentSize  = 'normal';
+let currentFont  = 'playfair';
+let currentQuoteIndex = 0;
+ 
+function setQuote(index) {
+  currentQuoteIndex = index;
+  qText.classList.remove('fade-in');
+  void qText.offsetWidth;
+  qText.textContent = quotes[index];
+  qText.classList.add('fade-in');
+  document.querySelectorAll('.quote-item').forEach((el, i) => {
+    el.classList.toggle('selected', i === index);
+  });
+}
+ 
+function updateCard() {
+  card.className = `quote-card theme-${currentTheme} size-${currentSize} font-${currentFont}`;
+}
+ 
+// Theme
+document.getElementById('themeGroup').addEventListener('click', e => {
+  const btn = e.target.closest('[data-theme]');
+  if (!btn) return;
+  currentTheme = btn.dataset.theme;
+  document.querySelectorAll('[data-theme]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  updateCard();
+});
+ 
+// Size
+document.getElementById('sizeGroup').addEventListener('click', e => {
+  const btn = e.target.closest('[data-size]');
+  if (!btn) return;
+  currentSize = btn.dataset.size;
+  document.querySelectorAll('[data-size]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  updateCard();
+});
+ 
+// Font
+document.getElementById('fontGroup').addEventListener('click', e => {
+  const btn = e.target.closest('[data-font]');
+  if (!btn) return;
+  currentFont = btn.dataset.font;
+  document.querySelectorAll('[data-font]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  updateCard();
+});
+ 
+// Generate random
+document.getElementById('generateBtn').addEventListener('click', () => {
+  let next;
+  do { next = Math.floor(Math.random() * quotes.length); } while (next === currentQuoteIndex);
+  setQuote(next);
+});
+ 
+// Build quote list
+const list = document.getElementById('quoteList');
+quotes.forEach((q, i) => {
+  const el = document.createElement('div');
+  el.className = 'quote-item' + (i === 0 ? ' selected' : '');
+  el.textContent = q;
+  el.addEventListener('click', () => setQuote(i));
+  list.appendChild(el);
+});
 </script>
-
 </body>
 </html>
+ 
+     
+
+
+
